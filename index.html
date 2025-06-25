@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Happy Birthday Card</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      font-family: 'Montserrat', Arial, sans-serif;
+      background: #000;
+    }
+
+    canvas#confetti-canvas, canvas#stars-bg {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    @keyframes float {
+      0% { transform: translate(-50%, -52%) translateY(0px); }
+      50% { transform: translate(-50%, -52%) translateY(-10px); }
+      100% { transform: translate(-50%, -52%) translateY(0px); }
+    }
+
+    .card {
+      z-index: 2;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -52%);
+      width: 260px;
+      background: rgba(255, 255, 255, 0.15);
+      border-radius: 30px;
+      box-shadow: 0 2px 32px 0 rgba(255, 186, 112, 0.18),
+                  0 1.5px 32px rgba(255, 121, 168, 0.11),
+                  0 0 0 6px rgba(255, 233, 236, 0.23);
+      border: 1.5px solid rgba(255,255,255,0.22);
+      padding: 36px 36px 28px 36px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      animation: float 4s ease-in-out infinite;
+      backdrop-filter: blur(22px) saturate(145%);
+      -webkit-backdrop-filter: blur(22px) saturate(145%);
+    }
+
+    .card-header h1 {
+      font-size: 2.4rem;
+      background: linear-gradient(90deg, #ff7eb3, #ff758c, #ffce7b, #8fd3f4, #a1ffce, #f9d423);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      -webkit-text-fill-color: transparent;
+      text-align: center;
+      margin: 0 0 18px 0;
+      font-weight: 900;
+      letter-spacing: 2px;
+      text-shadow: 0 1px 3px rgba(40,40,40,0.18);
+    }
+
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+    }
+
+    .arrow {
+      font-size: 1.6rem;
+      cursor: pointer;
+      color: #ff758c;
+      transition: transform 0.2s ease;
+      user-select: none;
+    }
+
+    .arrow:hover {
+      transform: scale(1.3);
+    }
+
+    .slider-text {
+      transition: opacity 0.6s ease-in-out;
+      font-size: 1.2rem;
+      color: #b05eae;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-shadow: 0 1px 10px #ffe7fa8c;
+      background: rgba(255,255,255,0.65);
+      border-radius: 16px;
+      padding: 10px 16px;
+    }
+
+    .cake {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin: 10px auto 20px auto;
+      filter: drop-shadow(0 2px 16px #ffe06688) drop-shadow(0 0px 8px #ffb34780);
+    }
+
+    .cake-body {
+      width: 70px;
+      height: 48px;
+      background: linear-gradient(180deg, #ffb347 80%, #ff758c 100%);
+      border-radius: 0 0 28px 28px;
+    }
+
+    .cake-base {
+      width: 90px;
+      height: 18px;
+      background: #fff0e1;
+      border-radius: 0 0 24px 24px;
+      margin-top: -8px;
+    }
+
+    .candle {
+      width: 8px;
+      height: 30px;
+      background: repeating-linear-gradient(135deg, #fff 0px, #fff 4px, #ff758c 4px, #ff758c 8px);
+      border-radius: 4px;
+      margin-bottom: -4px;
+      position: relative;
+    }
+
+    .candle:after {
+      content: "";
+      position: absolute;
+      top: -12px; left: 50%;
+      transform: translateX(-50%);
+      width: 14px; height: 14px;
+      background: radial-gradient(circle, #ffe066 45%, #ffbe0b 80%, transparent 100%);
+      border-radius: 50%;
+      opacity: 0.85;
+      animation: flame 1.2s infinite alternate;
+    }
+
+    @keyframes flame {
+      0% { transform: translateX(-50%) scale(0.9) rotate(-5deg);}
+      100% { transform: translateX(-50%) scale(1.2) rotate(5deg);}
+    }
+
+    .card-footer {
+      margin-top: 6px;
+      color: #ff758c;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-align: center;
+      opacity: 0.95;
+      text-shadow: 0 1px 12px #fff0e1, 0 1px 6px #ffd1e3;
+      background: rgba(255,255,255,0.55);
+      padding: 8px 22px;
+      border-radius: 30px;
+      box-shadow: 0 1px 8px #ffd1e3a1;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="stars-bg"></canvas>
+<canvas id="confetti-canvas"></canvas>
+
+<div class="card">
+  <div class="card-header">
+    <h1>Happy Birthday! 🎉</h1>
+  </div>
+  <div class="card-body">
+    <div class="slider-container">
+      <span class="arrow" id="left-arrow">&#8592;</span>
+      <p id="slider-text" class="slider-text">Wishing you a great day!</p>
+      <span class="arrow" id="right-arrow">&#8594;</span>
+    </div>
+    <div class="cake">
+      <div class="candle"></div>
+      <div class="cake-body"></div>
+      <div class="cake-base"></div>
+    </div>
+  </div>
+  <div class="card-footer">
+    <span>— A small gift from K.Yuvathilagan</span>
+  </div>
+</div>
+
+<script>
+  // Confetti setup
+  const confettiCanvas = document.getElementById('confetti-canvas');
+  const ctx = confettiCanvas.getContext('2d');
+  confettiCanvas.width = window.innerWidth;
+  confettiCanvas.height = window.innerHeight;
+  const confetti = [];
+
+  function randomColor() {
+    const colors = ['#FF6B6B', '#FFD93D', '#6BCB77', '#4D96FF', '#B388FF', '#F72585'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }
+
+  function createConfetti() {
+    for (let i = 0; i < 120; i++) {
+      confetti.push({
+        x: Math.random() * confettiCanvas.width,
+        y: Math.random() * confettiCanvas.height - confettiCanvas.height,
+        r: Math.random() * 4 + 2,
+        d: Math.random() * 1 + 0.5,
+        color: randomColor(),
+        tilt: Math.random() * 10 - 5
+      });
+    }
+  }
+
+  function drawConfetti() {
+    ctx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+    confetti.forEach(c => {
+      ctx.beginPath();
+      ctx.fillStyle = c.color;
+      ctx.ellipse(c.x, c.y, c.r, c.r * 0.6, c.tilt, 0, 2 * Math.PI);
+      ctx.fill();
+    });
+    updateConfetti();
+  }
+
+  function updateConfetti() {
+    confetti.forEach(c => {
+      c.y += c.d;
+      c.x += Math.sin(c.y * 0.01);
+      if (c.y > confettiCanvas.height) {
+        c.y = -20;
+        c.x = Math.random() * confettiCanvas.width;
+      }
+    });
+    requestAnimationFrame(drawConfetti);
+  }
+
+  createConfetti();
+  drawConfetti();
+
+  // Stars background
+  const starsCanvas = document.getElementById('stars-bg');
+  const sctx = starsCanvas.getContext('2d');
+  starsCanvas.width = window.innerWidth;
+  starsCanvas.height = window.innerHeight;
+  const stars = [];
+
+  for (let i = 0; i < 200; i++) {
+    stars.push({
+      x: Math.random() * starsCanvas.width,
+      y: Math.random() * starsCanvas.height,
+      r: Math.random() * 1.5 + 0.5,
+      alpha: Math.random(),
+      d: Math.random() * 0.02
+    });
+  }
+
+  function randomStarColor() {
+    const colors = ['#ffffff', '#f9f871', '#ffb3ec', '#80ed99', '#ffd6a5', '#a0c4ff', '#bdb2ff'];
+    return colors[Math.floor(Math.random() * colors.length)];
+  }
+
+  function drawStars() {
+    sctx.clearRect(0, 0, starsCanvas.width, starsCanvas.height);
+    stars.forEach(star => {
+      sctx.beginPath();
+      sctx.globalAlpha = star.alpha;
+      sctx.arc(star.x, star.y, star.r, 0, 2 * Math.PI);
+      sctx.fillStyle = randomStarColor();
+      sctx.fill();
+      star.alpha += star.d;
+      if (star.alpha <= 0 || star.alpha >= 1) star.d = -star.d;
+    });
+    sctx.globalAlpha = 1;
+    requestAnimationFrame(drawStars);
+  }
+  drawStars();
+
+  // Slider message logic (manual only)
+  const messages = [
+    "Wishing you a great day!",
+    "May your birthday be as special as you are!",
+    "Cheers to happiness, health, and dreams coming true!",
+    "Enjoy every magical moment today brings!",
+    "Here's to another year of wonderful adventures!"
+  ];
+  let currentMessage = 0;
+  const textElement = document.getElementById("slider-text");
+
+  function updateMessage() {
+    textElement.style.opacity = 0;
+    setTimeout(() => {
+      textElement.textContent = messages[currentMessage];
+      textElement.style.opacity = 1;
+    }, 400);
+  }
+
+  document.getElementById("left-arrow").addEventListener("click", () => {
+    currentMessage = (currentMessage - 1 + messages.length) % messages.length;
+    updateMessage();
+  });
+
+  document.getElementById("right-arrow").addEventListener("click", () => {
+    currentMessage = (currentMessage + 1) % messages.length;
+    updateMessage();
+  });
+</script>
+
+</body>
+</html>
